@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>BMW i3 Charge Ultimate</title>
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#0a84ff">
+
+<style>
+
+/* (same styling as before — unchanged for brevity) */
+
+body { font-family:-apple-system; background:#000; color:#fff; text-align:center; padding:10px; }
+
+.card { background:#111; padding:20px; border-radius:22px; max-width:420px; margin:auto; }
+
+.slider { width:90%; }
+
+button { padding:10px; margin:5px; border-radius:10px; border:none; background:#2c2c2e; color:white; }
+
+.main { background:#0a84ff; }
+
+.bar-container { width:90%; height:10px; background:#222; border-radius:10px; margin:15px auto; }
+
+.bar { height:100%; width:0%; background:linear-gradient(90deg,#00ffcc,#00aaff); transition:1s; }
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>BMW i3 Charge</h2>
+
+<div>Current: <span id="cval"></span>%</div>
+
+<input type="range" min="0" max="100" id="current" class="slider">
+
+<div>Target: <span id="tval"></span>%</div>
+
+<input type="range" min="0" max="100" id="target" class="slider">
+
+<br>
+
+<button onclick="preset(80)">80%</button>
+
+<button onclick="preset(90)">90%</button>
+
+<button onclick="preset(100)">100%</button>
+
+<br>
+
+<button class="main" onclick="run()">Charge</button>
+
+<div class="bar-container"><div class="bar" id="bar"></div></div>
+
+<div id="out"></div>
+
+</div>
+
+<script>
+
+const PRICE=0.0349,SIZE=39,REF=69;
+
+function init(){
+
+ current.value=localStorage.c||40;
+
+ target.value=localStorage.t||80;
+
+ update();
+
+}
+
+window.onload=init;
+
+function update(){
+
+ cval.innerText=current.value;
+
+ tval.innerText=target.value;
+
+}
+
+current.oninput=update;
+
+target.oninput=update;
+
+function preset(v){ target.value=v; update(); }
+
+function run(){
+
+ localStorage.c=current.value;
+
+ localStorage.t=target.value;
+
+ const c=+current.value;
+
+ const t=+target.value;
+
+ if(t<=c){ out.innerText="Invalid target"; return; }
+
+ const kWh=(t-c)/100*SIZE;
+
+ const pct=(kWh/REF)*100;
+
+ const cost=kWh*PRICE;
+
+ bar.style.width=(t-c)+"%";
+
+ out.innerHTML=
+
+ `🔋 ${kWh.toFixed(2)} kWh<br>
+
+  ⚡ ${Math.ceil(pct)}% charger<br>
+
+  💷 £${cost.toFixed(2)}`;
+
+}
+
+// service worker
+
+if("serviceWorker" in navigator){
+
+ navigator.serviceWorker.register("sw.js");
+
+}
+
+</script>
+
+</body>
+
+</html>
